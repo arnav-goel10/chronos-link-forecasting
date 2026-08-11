@@ -21,11 +21,21 @@ The Parquet schema metadata declares both
 ## Generation and reproducibility
 
 The checked-in artifact is generated with NumPy's seeded random generator and
-seed `42`. Two runs in the verified Python 3.12 and PyArrow 21 environment were
-byte-identical to the checked-in artifact, with SHA-256
+seed `42`. Within the verified Python 3.12 and PyArrow 21 environment it is
+byte-identical across runs, with SHA-256
 `0aac2a7dc9e8976199a4179a43e017611860b8bc3c83fa2dae9b3d060f819a51`.
 PyArrow is bounded in `pyproject.toml` so the writer format does not silently
 cross a major-version boundary.
+
+Byte-identity does not hold across environments, and the repository does not
+claim it does. The seeded draws (`eth_price`, `oracle_deviation`) reproduce
+exactly, but `target` and `gas_gwei` are derived through `sin` and `cumsum`,
+whose results can differ in the final floating-point bit between NumPy builds
+and CPU architectures. A measured cross-environment difference was on the order
+of `1e-15`. The Parquet container also records the writer version, so the file
+bytes change with PyArrow. `scripts/verify_sample_data.py` therefore checks
+schema, metadata, row count, and values within a `1e-9` tolerance, and CI runs
+that check rather than a digest comparison.
 
 ## Intended use and limitations
 

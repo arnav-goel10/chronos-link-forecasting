@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Type check
+        run: mypy
+
+      - name: Test
+        run: pytest -q
+
+      - name: Verify the synthetic fixture matches a fresh regeneration
+        env:
+          PYTHONPATH: scripts
+        run: python scripts/verify_sample_data.py --path data/sample/link_features.parquet --seed 42
+
+  install-from-wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build and install outside the source tree
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+          cd /tmp
+          python -m pip install "$GITHUB_WORKSPACE"/dist/*.whl
+          python -c "from chronos_link_forecasting.config import ExperimentConfig; \
+                     from chronos_link_forecasting.data.splits import split_frame; \
+                     from chronos_link_forecasting.evaluation.metrics import evaluate_quantiles; \
+                     print('import from installed wheel OK')"

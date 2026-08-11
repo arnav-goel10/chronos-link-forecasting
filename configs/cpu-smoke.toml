@@ -1,8 +1,10 @@
-data_path = "data/sample/link-hourly.csv"
+# Credential-free smoke experiment over the checked-in synthetic fixture.
+# Boundaries lie inside the fixture's 2026-01-01 -> 2026-03-01 hourly range.
+data_path = "data/sample/link_features.parquet"
 timestamp_column = "timestamp"
 id_column = "item_id"
 target_column = "target"
-past_covariates = ["volume", "market_cap"]
+past_covariates = ["eth_price", "gas_gwei", "oracle_deviation"]
 prediction_length = 12
 quantile_levels = [0.1, 0.5, 0.9]
 model_id = "seasonal-naive"
@@ -10,6 +12,6 @@ device = "cpu"
 seed = 42
 
 [split]
-train_end = "2023-01-01T00:00:00Z"
-validation_end = "2023-07-01T00:00:00Z"
-test_end = "2024-01-01T00:00:00Z"
+train_end = "2026-02-01T00:00:00Z"
+validation_end = "2026-02-15T00:00:00Z"
+test_end = "2026-03-02T00:00:00Z"

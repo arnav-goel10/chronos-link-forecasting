@@ -1,18 +1,15 @@
+# Template for a GPU run over a private, locally prepared LINK dataset.
+# The referenced Parquet file is not distributed with this repository.
 data_path = "data/link-hourly.parquet"
 timestamp_column = "timestamp"
 id_column = "item_id"
 target_column = "target"
-past_covariates = ["volume", "market_cap"]
+past_covariates = ["eth_price", "gas_gwei", "oracle_deviation"]
 prediction_length = 24
 quantile_levels = [0.1, 0.5, 0.9]
 model_id = "amazon/chronos-2"
 device = "cuda"
 seed = 42
-
-[split]
-train_end = "2023-01-01T00:00:00Z"
-validation_end = "2023-07-01T00:00:00Z"
-test_end = "2024-01-01T00:00:00Z"
 
 [training]
 bf16 = true
