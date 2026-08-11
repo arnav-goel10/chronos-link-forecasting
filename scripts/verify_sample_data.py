@@ -15,7 +15,6 @@ from pathlib import Path
 
 import pyarrow as pa  # type: ignore[import-untyped]
 import pyarrow.parquet as pq  # type: ignore[import-untyped]
-
 from make_sample_data import PARQUET_METADATA, make_sample_table
 
 TOLERANCE = 1e-9
@@ -36,7 +35,9 @@ def verify(path: Path, seed: int) -> list[str]:
     metadata = actual.schema.metadata or {}
     for key, value in PARQUET_METADATA.items():
         if metadata.get(key) != value:
-            failures.append(f"metadata {key!r} is {metadata.get(key)!r}, want {value!r}")
+            failures.append(
+                f"metadata {key!r} is {metadata.get(key)!r}, want {value!r}"
+            )
 
     if failures:
         return failures
