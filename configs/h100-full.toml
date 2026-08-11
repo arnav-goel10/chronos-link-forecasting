@@ -11,6 +11,12 @@ model_id = "amazon/chronos-2"
 device = "cuda"
 seed = 42
 
+# Temporal split only. Boundaries must fall inside the prepared dataset's range.
+[split]
+train_end = "2026-01-01T00:00:00Z"
+validation_end = "2026-04-01T00:00:00Z"
+test_end = "2026-07-01T00:00:00Z"
+
 [training]
 bf16 = true
 flash_attention_2 = "auto"
