@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pandas as pd
+import pyarrow.parquet as pq  # type: ignore[import-untyped]
 import pytest
 
 from chronos_link_forecasting.config import ExperimentConfig
@@ -31,11 +33,11 @@ learning_rate = 1e-5
     path = tmp_path / "experiment.toml"
     path.write_text(
         f"""
-data_path = "data/sample/link-hourly.csv"
+data_path = "data/sample/link_features.parquet"
 timestamp_column = "timestamp"
 id_column = "item_id"
 target_column = "target"
-past_covariates = ["volume", "market_cap"]
+past_covariates = ["eth_price", "gas_gwei", "oracle_deviation"]
 prediction_length = {prediction_length}
 quantile_levels = {quantile_levels}
 model_id = "{model_id}"
@@ -57,17 +59,64 @@ test_end = "2025-03-01T00:00:00Z"
 def test_cpu_smoke_config_loads_typed_forecasting_contract() -> None:
     config = ExperimentConfig.from_toml(REPOSITORY_ROOT / "configs" / "cpu-smoke.toml")
 
-    assert config.data_path == Path("data/sample/link-hourly.csv")
+    assert config.data_path == Path("data/sample/link_features.parquet")
     assert config.timestamp_column == "timestamp"
     assert config.id_column == "item_id"
     assert config.target_column == "target"
-    assert config.past_covariates == ("volume", "market_cap")
+    assert config.past_covariates == (
+        "eth_price",
+        "gas_gwei",
+        "oracle_deviation",
+    )
     assert config.prediction_length == 12
     assert config.quantile_levels == (0.1, 0.5, 0.9)
     assert config.model_id == "seasonal-naive"
     assert config.device == "cpu"
     assert config.seed == 42
     assert config.training is None
+
+
+def test_cpu_smoke_config_references_the_checked_in_fixture() -> None:
+    config = ExperimentConfig.from_toml(REPOSITORY_ROOT / "configs" / "cpu-smoke.toml")
+    data_path = REPOSITORY_ROOT / config.data_path
+
+    assert data_path.is_file(), f"cpu-smoke data_path is missing: {config.data_path}"
+
+    columns = set(pq.read_schema(data_path).names)
+    referenced = {
+        config.timestamp_column,
+        config.id_column,
+        config.target_column,
+        *config.past_covariates,
+    }
+    assert not referenced - columns, (
+        f"cpu-smoke config references absent columns: {sorted(referenced - columns)}"
+    )
+
+
+def test_cpu_smoke_split_partitions_the_fixture_into_three_windows() -> None:
+    config = ExperimentConfig.from_toml(REPOSITORY_ROOT / "configs" / "cpu-smoke.toml")
+    frame = pq.read_table(REPOSITORY_ROOT / config.data_path).to_pandas()
+    timestamps = pd.to_datetime(frame[config.timestamp_column])
+
+    train = int((timestamps < config.split.train_end).sum())
+    validation = int(
+        (
+            (timestamps >= config.split.train_end)
+            & (timestamps < config.split.validation_end)
+        ).sum()
+    )
+    test = int(
+        (
+            (timestamps >= config.split.validation_end)
+            & (timestamps < config.split.test_end)
+        ).sum()
+    )
+
+    assert train > 0
+    assert validation > 0
+    assert test >= config.prediction_length
+    assert train + validation + test == len(frame)
 
 
 def test_h100_config_requires_runtime_detection_for_flash_attention() -> None:

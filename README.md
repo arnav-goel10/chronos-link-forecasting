@@ -85,9 +85,10 @@ mypy
 pytest -q
 ```
 
-The suite covers 53 tests across configuration validation, split ordering and timezone
+The suite covers 55 tests across configuration validation, split ordering and timezone
 handling, future-leakage rejection, input immutability, baseline quantile monotonicity,
-known-answer metric values, and alignment-key validation. CI runs the same gate on
+known-answer metric values, alignment-key validation, and a check that the smoke
+configuration actually points at the checked-in fixture. CI runs the same gate on
 Python 3.12.
 
 ## Data
