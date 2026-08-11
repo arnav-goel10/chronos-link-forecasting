@@ -168,6 +168,35 @@ def test_causal_join_rejects_invalid_tolerance(tolerance: str) -> None:
         )
 
 
+@pytest.mark.parametrize("tolerance", ["NaT", pd.NaT])
+def test_causal_join_rejects_null_tolerance(
+    tolerance: str | pd.Timedelta,
+) -> None:
+    target = pd.DataFrame(
+        {
+            "item_id": ["LINK"],
+            "timestamp": pd.to_datetime(["2026-01-01 10:00Z"]),
+            "target": [10.0],
+        }
+    )
+    feature = pd.DataFrame(
+        {
+            "item_id": ["LINK"],
+            "timestamp": pd.to_datetime(["2026-01-01 09:55Z"]),
+            "eth_price": [3000.0],
+        }
+    )
+
+    with pytest.raises(ValueError, match=r"^tolerance must be a positive duration$"):
+        causal_asof_join(
+            target,
+            feature,
+            timestamp="timestamp",
+            by="item_id",
+            tolerance=tolerance,
+        )
+
+
 @pytest.mark.parametrize(
     ("target", "feature", "message"),
     [

@@ -49,7 +49,7 @@ def causal_asof_join(
             parsed_tolerance = pd.Timedelta(tolerance)
     except (TypeError, ValueError) as error:
         raise ValueError("tolerance must be a positive duration") from error
-    if parsed_tolerance <= pd.Timedelta(0):
+    if pd.isna(parsed_tolerance) or parsed_tolerance <= pd.Timedelta(0):
         raise ValueError("tolerance must be a positive duration")
 
     target_copy = target.copy(deep=True).sort_values([timestamp, by], kind="mergesort")
