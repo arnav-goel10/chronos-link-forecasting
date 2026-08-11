@@ -9,6 +9,7 @@ description = "Causal temporal contracts for Chronos-2 LINK forecasting research
 requires-python = ">=3.12"
 dependencies = [
     "pandas>=2.2,<3.0",
+    "pyarrow>=21.0,<22.0",
 ]
 
 [project.optional-dependencies]
