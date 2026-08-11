@@ -32,6 +32,19 @@ before `t`. Two mechanisms enforce this:
 Both are covered by tests that construct a future-dated feature and assert it does not
 appear in the aligned output.
 
+## Baseline interval behaviour
+
+Both baselines derive their quantile spread from residuals observed in the
+context window, and apply that same spread at every step of the horizon. The
+intervals are therefore flat: P90 minus P10 is identical at step 1 and step 12.
+
+That is deliberate for a naive baseline, but it is not what a random walk does.
+Genuine forecast uncertainty grows roughly with the square root of the horizon,
+so interval coverage from these baselines should be expected to decay at longer
+horizons while the reported mean interval width stays constant. Read the two
+together, and treat these baselines as a floor for calibration comparisons
+rather than as calibrated models.
+
 ## What the numbers here do and do not support
 
 The repository ships a synthetic fixture generated from a seeded NumPy process. Any metric
