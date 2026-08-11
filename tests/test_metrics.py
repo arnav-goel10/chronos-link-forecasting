@@ -121,6 +121,32 @@ def test_metrics_reject_duplicate_keys() -> None:
         evaluate_quantiles(actual, predictions, (0.1, 0.5, 0.9))
 
 
+@pytest.mark.parametrize("frame_name", ["actual", "predictions"])
+@pytest.mark.parametrize(
+    ("invalid_key", "message"),
+    [
+        ("null_item_id", "item_id must not contain missing values"),
+        ("nat_timestamp", "timestamp must not contain missing values"),
+        ("string_timestamp", "timestamp must be datetime-like"),
+    ],
+)
+def test_metrics_reject_invalid_alignment_keys(
+    frame_name: str, invalid_key: str, message: str
+) -> None:
+    actual = _actual([10.0, 20.0])
+    predictions = _predictions([9.0, 19.0], [10.0, 20.0], [11.0, 21.0])
+    frame = actual if frame_name == "actual" else predictions
+    if invalid_key == "null_item_id":
+        frame.loc[0, "item_id"] = None
+    elif invalid_key == "nat_timestamp":
+        frame.loc[0, "timestamp"] = pd.NaT
+    else:
+        frame["timestamp"] = frame["timestamp"].astype(str)
+
+    with pytest.raises(ValueError, match=rf"^{frame_name} {message}$"):
+        evaluate_quantiles(actual, predictions, (0.1, 0.5, 0.9))
+
+
 @pytest.mark.parametrize(
     ("quantiles", "message"),
     [

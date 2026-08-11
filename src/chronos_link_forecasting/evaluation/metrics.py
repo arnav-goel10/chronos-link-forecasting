@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from itertools import pairwise
 
 import pandas as pd
-from pandas.api.types import is_numeric_dtype
+from pandas.api.types import is_datetime64_any_dtype, is_numeric_dtype
 
 _KEY_COLUMNS = ("item_id", "timestamp")
 _SUMMARY_QUANTILES = (0.1, 0.5, 0.9)
@@ -124,6 +124,12 @@ def _validate_schema(
         missing = ", ".join(sorted(str(column) for column in missing_predictions))
         raise ValueError(f"predictions must include columns: {missing}")
     for frame_name, frame in (("actual", actual), ("predictions", predictions)):
+        if frame["item_id"].isna().any():
+            raise ValueError(f"{frame_name} item_id must not contain missing values")
+        if not is_datetime64_any_dtype(frame["timestamp"].dtype):
+            raise ValueError(f"{frame_name} timestamp must be datetime-like")
+        if frame["timestamp"].isna().any():
+            raise ValueError(f"{frame_name} timestamp must not contain missing values")
         if frame.duplicated(subset=list(_KEY_COLUMNS)).any():
             raise ValueError(f"{frame_name} contains duplicate item_id/timestamp keys")
 
