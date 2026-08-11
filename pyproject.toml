@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chronos-link-forecasting"
+version = "0.1.0"
+description = "Causal temporal contracts for Chronos-2 LINK forecasting research"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2,<3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.14,<2.0",
+    "pandas-stubs>=2.2",
+    "pytest>=8.3,<9.0",
+    "ruff>=0.9,<1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+mypy_path = "src"
+explicit_package_bases = true

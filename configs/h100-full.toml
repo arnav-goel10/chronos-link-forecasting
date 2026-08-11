@@ -1,0 +1,23 @@
+data_path = "data/link-hourly.parquet"
+timestamp_column = "timestamp"
+id_column = "item_id"
+target_column = "target"
+past_covariates = ["volume", "market_cap"]
+prediction_length = 24
+quantile_levels = [0.1, 0.5, 0.9]
+model_id = "amazon/chronos-2"
+device = "cuda"
+seed = 42
+
+[split]
+train_end = "2023-01-01T00:00:00Z"
+validation_end = "2023-07-01T00:00:00Z"
+test_end = "2024-01-01T00:00:00Z"
+
+[training]
+bf16 = true
+flash_attention_2 = "auto"
+per_device_train_batch_size = 32
+gradient_accumulation_steps = 8
+max_steps = 1000
+learning_rate = 1e-5
