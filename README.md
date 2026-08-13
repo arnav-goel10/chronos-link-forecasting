@@ -1,5 +1,7 @@
 # Chronos LINK Forecasting
 
+[![CI](https://github.com/arnav-goel10/chronos-link-forecasting/actions/workflows/ci.yml/badge.svg)](https://github.com/arnav-goel10/chronos-link-forecasting/actions/workflows/ci.yml)
+
 Leakage-safe foundations for probabilistic LINK/USDT forecasting: strict experiment
 configuration, temporal splitting, causal feature alignment, probabilistic baselines,
 and quantile evaluation metrics.
