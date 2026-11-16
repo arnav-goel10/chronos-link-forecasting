@@ -17,7 +17,7 @@ on:
         description: Data venue (auto tries Coinbase, then Kraken)
         default: auto
   push:
-    branches: [improve-nov16]
+    branches: [main]
     paths:
       - "src/**"
       - "scripts/fetch_link_candles.py"
