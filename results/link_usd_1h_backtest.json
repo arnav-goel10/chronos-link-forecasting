@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-16T00:07:43.370285+00:00",
+  "provenance": {
+    "github_run_id": "43778397490",
+    "github_sha": "c1f2dc23ed013f31910211c116443b59ffd72f74",
+    "github_ref": "refs/heads/improve-nov16",
+    "github_workflow": "Benchmark"
+  },
+  "data": {
+    "venue": "coinbase",
+    "symbol": "LINK-USD",
+    "granularity": "1h",
+    "target": "close",
+    "requested_start": "2026-05-20T00:00:00+00:00",
+    "requested_end_exclusive": "2026-11-16T00:00:00+00:00",
+    "fetched_at": "2026-11-16T00:07:27.780367+00:00",
+    "candles_returned": 4320,
+    "rows": 4320,
+    "filled_hours": 0,
+    "notes": [],
+    "first_timestamp": "2026-05-20T00:00:00+00:00",
+    "last_timestamp": "2026-11-15T23:00:00+00:00",
+    "sha256_timestamp_target_csv": "07b10f351e4c0ed64a46c0cc868c57fdd31d0b8ce14f085e0b5ab5bfcedd6381"
+  },
+  "backtest": {
+    "method": "rolling origin, fixed context, zero-shot (no fitting)",
+    "prediction_length_hours": 24,
+    "stride_hours": 12,
+    "context_length_hours": 512,
+    "test_hours": 1440,
+    "test_filled_hours": 0,
+    "season_length_hours": 24,
+    "quantile_levels": [
+      0.1,
+      0.5,
+      0.9
+    ],
+    "first_origin": "2026-09-17T00:00:00+00:00",
+    "last_origin": "2026-11-15T00:00:00+00:00",
+    "windows": 119,
+    "scored_points": 2856
+  },
+  "environment": {
+    "python": "3.12.16",
+    "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+    "pandas": "2.3.3",
+    "torch": "2.15.0+cpu",
+    "chronos_forecasting": "2.3.2",
+    "chronos_checkpoint": "amazon/chronos-bolt-tiny"
+  },
+  "models": {
+    "last-value": {
+      "label": "Last value",
+      "weighted_quantile_loss": 0.01716452703706056,
+      "p50_mae": 0.25109768907563024,
+      "coverage_80": 0.33088235294117646,
+      "interval_width_80": 0.19416806722689087,
+      "runtime_seconds": 0.36
+    },
+    "seasonal-naive": {
+      "label": "Seasonal naive (24h)",
+      "weighted_quantile_loss": 0.018409177152111544,
+      "p50_mae": 0.351923319327731,
+      "coverage_80": 0.8070728291316527,
+      "interval_width_80": 1.1548176470588232,
+      "runtime_seconds": 0.34
+    },
+    "chronos": {
+      "label": "Chronos zero-shot (amazon/chronos-bolt-tiny)",
+      "weighted_quantile_loss": 0.014033462830939931,
+      "p50_mae": 0.26096880927473226,
+      "coverage_80": 0.7230392156862745,
+      "interval_width_80": 0.708282944535007,
+      "runtime_seconds": 8.25
+    }
+  },
+  "ranking_by_weighted_quantile_loss": [
+    "chronos",
+    "last-value",
+    "seasonal-naive"
+  ]
+}
