@@ -115,7 +115,7 @@ def test_metrics_reject_length_key_or_timestamp_mismatch(mutate: object) -> None
 def test_metrics_reject_duplicate_keys() -> None:
     actual = _actual([10.0, 20.0])
     predictions = _predictions([9.0, 19.0], [10.0, 20.0], [11.0, 21.0])
-    predictions.loc[1, "timestamp"] = predictions.loc[0, "timestamp"]
+    predictions["timestamp"] = [predictions["timestamp"].iloc[0]] * 2
 
     with pytest.raises(ValueError, match="duplicate item_id/timestamp"):
         evaluate_quantiles(actual, predictions, (0.1, 0.5, 0.9))

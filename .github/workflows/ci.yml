@@ -56,4 +56,6 @@ jobs:
           python -c "from chronos_link_forecasting.config import ExperimentConfig; \
                      from chronos_link_forecasting.data.splits import split_frame; \
                      from chronos_link_forecasting.evaluation.metrics import evaluate_quantiles; \
+                     from chronos_link_forecasting.evaluation.backtest import rolling_origin_backtest; \
+                     from chronos_link_forecasting.models.chronos import ChronosForecaster; \
                      print('import from installed wheel OK')"

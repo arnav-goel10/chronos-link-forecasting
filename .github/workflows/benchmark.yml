@@ -1,0 +1,78 @@
+name: Benchmark
+
+# Fetches public hourly LINK/USD candles at run time, runs the rolling-origin
+# backtest for the two naive baselines and zero-shot Chronos on CPU, and uploads
+# the results JSON. Nothing is trained.
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Days of hourly history to fetch
+        default: "180"
+      test_hours:
+        description: Hours at the end of the series used as forecast origins
+        default: "1440"
+      venue:
+        description: Data venue (auto tries Coinbase, then Kraken)
+        default: auto
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "scripts/fetch_link_candles.py"
+      - "pyproject.toml"
+      - ".github/workflows/benchmark.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DAYS: ${{ inputs.days || '180' }}
+      TEST_HOURS: ${{ inputs.test_hours || '1440' }}
+      VENUE: ${{ inputs.venue || 'auto' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CPU torch and the chronos extra
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e '.[chronos]'
+          python -m pip freeze | grep -iE '^(torch|chronos-forecasting|transformers|pandas)=='
+
+      - name: Cache Hugging Face weights
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-chronos-bolt-tiny-v1
+
+      - name: Fetch hourly LINK/USD candles
+        run: |
+          python scripts/fetch_link_candles.py --days "$DAYS" --venue "$VENUE" \
+            --out artifacts/link_usd_1h.parquet
+
+      - name: Run the backtest
+        run: |
+          python -m chronos_link_forecasting.evaluate \
+            --data artifacts/link_usd_1h.parquet \
+            --out artifacts/link_usd_1h_backtest.json \
+            --test-hours "$TEST_HOURS"
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-usd-1h-backtest
+          path: |
+            artifacts/link_usd_1h_backtest.json
+            artifacts/link_usd_1h.meta.json
+            artifacts/link_usd_1h.parquet
+          if-no-files-found: error

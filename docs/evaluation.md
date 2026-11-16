@@ -45,18 +45,27 @@ horizons while the reported mean interval width stays constant. Read the two
 together, and treat these baselines as a floor for calibration comparisons
 rather than as calibrated models.
 
+## Backtest
+
+`rolling_origin_backtest` places forecast origins every `stride` hours across the last
+`test_hours` of the series. For an origin at row `i`, the model receives a copy of rows
+`[i - context_length, i)` and the next `prediction_length` rows are held back as the
+actuals. Every window uses the same context length, and each window is scored under its
+own `item_id`, so overlapping windows cannot collide on keys. No model is fitted, so
+there is no training or validation split to leak from. The baselines estimate their
+spread from the context only, and Chronos is used zero-shot.
+
 ## What the numbers here do and do not support
 
-The repository ships a synthetic fixture generated from a seeded NumPy process. Any metric
-computed from it describes the behaviour of the code on that fixture and nothing else.
+`results/link_usd_1h_backtest.json` is a measurement of three models on one window of
+Coinbase LINK-USD hourly closes. It supports a comparison of those models on that window
+under the stated backtest. It is **not** evidence that:
 
-Specifically, results from this repository are **not** evidence that:
+- the ranking holds on another period, another asset or another horizon, since no
+  significance test or repeated run is reported;
+- a fine-tuned Chronos or Chronos-2 model would do better or worse;
+- the synthetic fixture's covariate names (`eth_price`, `gas_gwei`, `oracle_deviation`)
+  correspond to real measurements. They describe a schema shape, not observations.
 
-- these baselines forecast LINK prices well, or at all;
-- a fine-tuned Chronos-2 model would outperform them;
-- the covariate names (`eth_price`, `gas_gwei`, `oracle_deviation`) correspond to real
-  measurements. They describe a schema shape, not observations.
-
-Any future accuracy claim requires a named dataset, a stated split, a named baseline, a
-unit, and a reproducible artifact. Until those exist, this repository documents an
-evaluation harness rather than a result.
+Metrics computed on the checked-in synthetic fixture describe the behaviour of the code
+on that fixture and nothing else.

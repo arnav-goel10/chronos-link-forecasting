@@ -5,14 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "chronos-link-forecasting"
 version = "0.1.0"
-description = "Causal temporal contracts for Chronos-2 LINK forecasting research"
+description = "Zero-shot Chronos against naive baselines on hourly LINK/USD, with a leakage-safe rolling backtest"
 requires-python = ">=3.12"
 dependencies = [
+    "numpy>=1.26",
     "pandas>=2.2,<3.0",
     "pyarrow>=21.0,<22.0",
 ]
 
 [project.optional-dependencies]
+chronos = [
+    "chronos-forecasting>=1.5,<3",
+]
 dev = [
     "mypy>=1.14,<2.0",
     "pandas-stubs>=2.2",
