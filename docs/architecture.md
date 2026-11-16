@@ -59,7 +59,12 @@ bleed into another.
 
 `ProbabilisticForecaster` is a structural `Protocol` describing `predict(context,
 prediction_length, quantiles) -> DataFrame`. Both baselines conform to it, which is what
-allows a Chronos-2 adapter to be dropped in later without the evaluation path changing.
+lets `ChronosForecaster` (`models/chronos.py`, zero-shot Chronos-Bolt Tiny) run through
+the same evaluation path.
+
+Three modules sit around the models. `data/candles.py` fetches public hourly candles and
+puts them on a regular grid. `evaluation/backtest.py` runs the rolling-origin backtest.
+`evaluate.py` is the command that scores every model and writes the results file.
 
 `LastValueBaseline` propagates the final observed value across the horizon.
 `SeasonalNaiveBaseline` repeats the value one season back. Both derive quantile spreads

@@ -54,9 +54,10 @@ data.
 ## What it does
 
 - **Live public data.** `scripts/fetch_link_candles.py` pulls hourly LINK/USD candles
-  from the Coinbase Exchange public API with no key, falling back to Kraken's public
-  OHLC endpoint. Hours with no trades carry the previous close forward, and the count of
-  such hours is recorded.
+  from the Coinbase Exchange public API with no key. If Coinbase is unreachable it falls
+  back to Kraken's public OHLC endpoint, which returns only the last 720 hours, so a
+  Kraken run needs a smaller `--test-hours`. Hours with no trades carry the previous
+  close forward, and the count of such hours is recorded.
 - **Rolling-origin backtest.** `rolling_origin_backtest` hands each model a copy of the
   fixed-length context strictly before the origin and nothing else. Tests check that
   every context ends one hour before its origin and that overwriting all future values
